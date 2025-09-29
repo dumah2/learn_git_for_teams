@@ -6,4 +6,6 @@ export interface ISessionContext {
     setUser: (user: IUser) => void;
     accessToken: TAccessToken;
     setAccessToken: (token: TAccessToken) => void;
+    isLoggedIn: boolean;
+    setIsLoggedIn: (status: boolean) => void;
 }

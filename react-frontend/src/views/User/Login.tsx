@@ -1,98 +1,81 @@
-import { useQuery } from "@tanstack/react-query";
-import { useContext, useState } from "react";
-
+import React, { useContext, useState } from "react";
 import { Auth, getEndpoint } from "../../utils/apiEndpoints";
-import type ApiErrorData from "../../interfaces/General/ApiErrorData";
+import type IApiErrorData from "../../interfaces/General/IApiErrorData";
+import { useMutation } from "@tanstack/react-query";
 import { SessionContext } from "../../contexts/SessionContextProvider";
 import type ILoginResponseData from "../../interfaces/Auth/ILoginResponseData";
+import { Link, useNavigate } from "react-router-dom";
 
-// Custom hook for post login
-const usePostLogin = (email: string, password: string) => {
-    // Login api call function
-    const postLogin = async () => {
-        const endpoint = getEndpoint(Auth.login);
-        const response = await fetch(endpoint, {
+export default function Login() {
+    const { setIsLoggedIn, setUser, setAccessToken } =
+        useContext(SessionContext);
+
+    // Local states for login
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [error, setError] = useState<string>("");
+
+    // Post login request function
+    const postLogin = async (email: string, password: string) => {
+        const response = await fetch(getEndpoint(Auth.login), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
-            body: JSON.stringify({
-                email: email,
-                password: password,
-            }),
+            body: JSON.stringify({ email, password }),
         });
 
-        // Handle HTTP response on failure
+        // Handle error status
         if (!response.ok) {
-            const errorData: ApiErrorData = await response.json();
-            const errorMessage = errorData.message;
-            throw new Error(errorMessage);
+            const error: IApiErrorData = await response.json();
+            error.message = error.message
+                ? error.message
+                : "Error while loggin in. Please reload and try again later";
+            throw new Error(error.message);
         }
 
         return response.json();
     };
+    const navigate = useNavigate();
 
-    const { data, isLoading, error } = useQuery<ILoginResponseData>({
-        queryKey: ["post-login"],
-        queryFn: postLogin,
+    const { mutate } = useMutation({
+        mutationFn: () => postLogin(email, password),
+        // Log user in
+        onSuccess: (data: ILoginResponseData) => {
+            setUser(data.user);
+            setAccessToken(data.token);
+            setIsLoggedIn(true);
+            navigate("/profile");
+        },
+        onError: (error) => {
+            setError(error.message);
+        },
     });
 
-    return { data, isLoading, error };
-};
-export default function Login() {
-    // Local state for form inputs and Loading/Error status
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    // Access session context
-    const { setUser, setAccessToken } = useContext(SessionContext);
-
-    // Handle submit function
+    // Handle form submition
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         // Prevent submition
         e.preventDefault();
 
-        // Fetch data
-        const { data, isLoading, error } = usePostLogin(email, password);
-
-        if (isLoading) setIsLoading(true);
-        // Display error message on failure
-        if (error) {
-            setError(error.message);
-            return;
-        }
-
-        // Handle success
-        if (data) {
-            if (data.token && data.user) {
-                setAccessToken(data.token);
-                setUser(data.user);
-                console.log(data);
-                return;
-            }
-        }
-
-        // If data undefined or required props are missing
-        setError("Error while logging in. Please reload and try again later");
+        // Try login
+        mutate();
     };
-
     return (
         <div>
-            <p>{isLoading ? "Is loading" : <></>}</p>
             <p>{error}</p>
-            <form action="post" onSubmit={handleSubmit}>
-                {/* Email input*/}
+            <form onSubmit={(e) => handleSubmit(e)}>
+                {/* Email field */}
                 <label htmlFor="email">Email</label>
                 <input
                     type="email"
-                    placeholder="example@gmail.com"
                     id="email"
+                    name="email"
+                    placeholder="example@gmail.com"
                     onChange={(e) => setEmail(e.target.value)}
                 />
 
-                {/* Password input */}
+                {/* Password field*/}
                 <label htmlFor="password">Password</label>
                 <input
                     type="password"
@@ -101,6 +84,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                 />
                 <button type="submit">Submit</button>
+                <Link to={"/register"}>Register</Link>
             </form>
         </div>
     );

@@ -15,6 +15,8 @@ const initContext: ISessionContext = {
     setUser: () => void {},
     accessToken: "",
     setAccessToken: () => void {},
+    isLoggedIn: false,
+    setIsLoggedIn: () => void {},
 };
 
 // Declare context
@@ -30,6 +32,9 @@ export const SessionContextProvider = ({ children }: IReactNodeChildren) => {
         storageToken && storageToken.length > 0 ? storageToken : ""
     );
 
+    // Logged in state
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
     // Declare public setToken
     const setToken = (token: TAccessToken): void => {
         _setToken(token);
@@ -43,6 +48,8 @@ export const SessionContextProvider = ({ children }: IReactNodeChildren) => {
         setUser: setUser,
         accessToken: token,
         setAccessToken: setToken,
+        isLoggedIn: isLoggedIn,
+        setIsLoggedIn: setIsLoggedIn,
     };
 
     return (

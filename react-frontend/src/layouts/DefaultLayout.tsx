@@ -1,10 +1,14 @@
-import React, { useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { useContext } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { SessionContext } from "../contexts/SessionContextProvider";
 
 export default function DefaultLayout() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // Get current path
+    const location = useLocation();
+    const currentPath = location.pathname;
 
-    if (!isLoggedIn) {
+    const { isLoggedIn } = useContext(SessionContext);
+    if (!isLoggedIn && currentPath != "/register") {
         return <Navigate to={"/login"} />;
     }
 

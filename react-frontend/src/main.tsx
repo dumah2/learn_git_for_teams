@@ -8,7 +8,7 @@ import { SessionContextProvider } from "./contexts/SessionContextProvider.tsx";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-    <SessionContextProvider >
+    <SessionContextProvider>
         <QueryClientProvider client={queryClient}>
             <RouterProvider router={router} />
         </QueryClientProvider>

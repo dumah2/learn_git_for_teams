@@ -4,6 +4,7 @@ import Posts from "../views/Post/Posts";
 import Porfile from "../views/User/Porfile";
 import GuestLayout from "../layouts/GuestLayout";
 import Login from "../views/User/Login";
+import Register from "../views/User/Register";
 
 export const router = createBrowserRouter([
     {
@@ -25,8 +26,12 @@ export const router = createBrowserRouter([
         element: <GuestLayout />,
         children: [
             {
-                path: "/login",
+                path: "login",
                 element: <Login />,
+            },
+            {
+                path: "register",
+                element: <Register />,
             },
         ],
     },
