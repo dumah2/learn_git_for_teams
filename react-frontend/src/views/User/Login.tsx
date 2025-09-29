@@ -7,7 +7,7 @@ import type ILoginResponseData from "../../interfaces/Auth/ILoginResponseData";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
-    const { setIsLoggedIn, setUser, setAccessToken } =
+    const { setIsLoggedIn, setUser, setAccessToken, user } =
         useContext(SessionContext);
 
     // Local states for login
